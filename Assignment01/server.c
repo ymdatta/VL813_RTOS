@@ -132,10 +132,14 @@ void *thread_routine(void *param) {
 	char msg[MAXLEN];
 	int new_fd = *(int *)param;
 	int flag = 2;
-	struct s_list *s_new = malloc(sizeof(struct s_list));	
+	struct s_list *s_new = malloc(sizeof(struct s_list));
+	s_new->id = 1;
+	// TODO: Explain why we need this varialbe in comments
+	// In Brief: to limit what recv receives.
+	int r_len = 1;
 	while(1) {
 		memset(msg, 0, MAXLEN);								
-		int recv_ret = recv(new_fd, msg, MAXLEN, 0);
+		int recv_ret = recv(new_fd, msg, r_len, 0);
 
 		if(recv_ret == -1) {
 			perror("recv");
@@ -148,8 +152,10 @@ void *thread_routine(void *param) {
 		}
 		if (flag == 2) {
 			printf("In here with flag..\n");
+			printf("Message received is %s\n", msg);
 			printf("GroupId of connection: %d\n", atoi(msg));
 			s_new->id = atoi(msg);
+			r_len = MAXLEN;
 		}
 		else if(flag == 1) {
 			printf("Too here with flag..\n");			
@@ -160,7 +166,7 @@ void *thread_routine(void *param) {
 			add_socket(s_new);
 		} else {
 			printf("Message received by server: %s\n", msg);
-			send_message(1, msg);
+			send_message(s_new->id, msg);
 		}
 
 		if (flag > 0)

@@ -32,8 +32,12 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
+	memset(ID, 0, 4);
+	memset(CPORT, 0, 100);
 	strcpy(CPORT, argv[2]);
 	strcpy(ID, argv[1]);
+
+	argv[1][2] = '\0';
 
 	printf("ID is %s\n", ID);
 	printf("CPORT is %s\n", CPORT);
@@ -109,7 +113,7 @@ void *thread_write(void *param) {
 	};
 
 	// Send GroupID first
-	memset(msg, 0, MAXLEN);	
+	memset(msg, 0, MAXLEN);
 	strcpy(msg, ID);
 	send_message(sockfd, msg);
 	memset(msg, 0, MAXLEN);		
