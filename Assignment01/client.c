@@ -1,4 +1,3 @@
-// TODO: Rearrange the headers alphabetically
 #include <netinet/in.h>
 #include <netdb.h>
 #include <pthread.h>
@@ -10,7 +9,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#define MYPORT "3233" //the port clients will be connecting to
+// #define SPORT "3233"
+char SPORT[4];  //the port clients will be connecting to
 #define BACKLOG 5 // how many pending client connections queue will hold
 #define MAXLEN 1000
 
@@ -27,15 +27,21 @@ void send_message(int sockfd, char *msg);
 
 int main(int argc, char **argv) {
 
-	if (argc != 3) {
-		printf("Usage: ./client GROUP_ID PORT_NO\n");
+	if (argc != 4) {
+		printf("Usage: ./client GROUP_ID CLIENT_PORT_NO SERVER_PORT_NO\n");
+		printf("GROUPID: Group to which this client belongs\n");
+		printf("CLIENT_PORT_NO: Port at which client receives messages\n");
+		printf("SERVER_PORT_NO: Port at which server receives messages (4 digits)\n");
+		printf("Ex: ./client 2 4001 3233\n");
 		exit(1);
 	}
 
 	memset(ID, 0, 4);
 	memset(CPORT, 0, 100);
+	memset(SPORT, 0, 4);
+	strcpy(ID, argv[1]);	
 	strcpy(CPORT, argv[2]);
-	strcpy(ID, argv[1]);
+	strncpy(SPORT, argv[3], 4);
 
 	argv[1][2] = '\0';
 
@@ -88,7 +94,7 @@ void *thread_write(void *param) {
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE; // fill in my IP for me
 
-	int ginfo = getaddrinfo(NULL, MYPORT, &hints, &res);
+	int ginfo = getaddrinfo(NULL, SPORT, &hints, &res);
 
 	if(ginfo != 0) {
 		// TODO: Make error statement more clear by including
@@ -99,7 +105,6 @@ void *thread_write(void *param) {
 		
 
 	// make a socket, bind it, and listen on it:
-
 	sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	if (sockfd == -1) {
 		perror("socket");
