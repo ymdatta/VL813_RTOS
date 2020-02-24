@@ -82,7 +82,6 @@ int main(int argc, char **argv) {
  * 5. Terminate when message sending fails (or) server closes
  */
 
-// TODO: Implement GroupID protocol along with port
 void *thread_write(void *param) {
 	char msg[1000];
 

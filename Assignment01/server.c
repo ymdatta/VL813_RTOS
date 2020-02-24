@@ -239,8 +239,6 @@ void send_message(int g_id, char* msg, char* s_port, clock_t start_time) {
 				int ginfo = getaddrinfo(NULL, cPort, &hints, &res);
 
 				if(ginfo != 0) {
-					// TODO: Make error statement more clear by including
-					// the type of error. Check getaddrinfo man. Use errno
 					perror("getaddrinfo");
 					exit(1);
 				}
