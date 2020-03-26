@@ -162,12 +162,6 @@ void *thread_read(void *param) {
 
 	// clear message
 	memset(msg, 0, MAXLEN);
-
-	/* // Execute close_server() signal handler when CTRL-C is called */
-	/* if (signal(SIGINT, close_server) == SIG_ERR) { */
-	/* 	perror("signal"); */
-	/* 	exit(1); */
-	/* } */ 
 	
 	// Load up address structs with getaddrinfo():
 	memset(&hints, 0, sizeof hints);
