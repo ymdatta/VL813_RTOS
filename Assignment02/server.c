@@ -28,6 +28,7 @@ struct client {
 	int g_id;
 	char port[4];
 	struct client *next;
+	int sockfd;
 };
 
 void close_server(int signum);
@@ -208,6 +209,7 @@ void *thread_recv_msg_from_client(void *param) {
 			memset(s_new->port, 0, 4);
 			strncpy(s_new->port, msg, 4);
 			s_new->next = NULL;
+			s_new->sockfd = -1;
 			add_client(s_new);
 			r_len = MAXLEN;
 			flag = 0;
@@ -265,7 +267,7 @@ void close_server(int signum) {
  */
 void send_message(int g_id, char* msg, char* s_port, clock_t start_time) {
 
-	int sockfd;
+//	int sockfd;
 	char cPort[4];
 	clock_t end_time;
 	struct addrinfo hints, *res;	
@@ -287,32 +289,35 @@ void send_message(int g_id, char* msg, char* s_port, clock_t start_time) {
 
 				strncpy(cPort, c_node->port, 4);
 
-				int ginfo = getaddrinfo(NULL, cPort, &hints, &res);
+				if (c_node->sockfd == -1) {
+					int ginfo = getaddrinfo(NULL, cPort, &hints, &res);
 
-				if(ginfo != 0) {
-					perror("getaddrinfo");
-					exit(1);
+					if(ginfo != 0) {
+						perror("getaddrinfo");
+						exit(1);
+					}
+
+					// make a socket, bind it, and listen on it:
+					c_node->sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+					if (c_node->sockfd == -1) {
+						perror("socket");
+						exit(1);
+					}
+
+					// Connect
+					freeaddrinfo(res);
+
+					while(connect(c_node->sockfd, res->ai_addr, res->ai_addrlen) != -1) {
+						perror("connect");
+					};
 				}
-
-				// make a socket, bind it, and listen on it:
-				sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-				if (sockfd == -1) {
-					perror("socket");
-					exit(1);
-				}
-
-				// Connect
-				freeaddrinfo(res);
-				while(connect(sockfd, res->ai_addr, res->ai_addrlen) != -1) {
-					perror("connect");
-				};
 
 				// casting done here. Be careful. Check again
 				int msg_len = strlen(msg);
 
 				// send the message now.
 				printf("sending msg to port: %s", c_node->port);
-				int bytes_sent = send(sockfd, msg, msg_len, 0);
+				int bytes_sent = send(c_node->sockfd, msg, msg_len, 0);
 
 				if(bytes_sent == -1) {
 					perror("send");

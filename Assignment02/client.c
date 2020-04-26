@@ -284,23 +284,25 @@ void *thread_routine(void *param) {
 	int new_fd = *(int *)param;
 
 	printf("Process ID of this client: %d\n", getpid());
-	int recv_ret = recv(new_fd, msg, MAXLEN - 1, 0);
-	msg[MAXLEN - 1] = '\0';
+	while (1) {
+		int recv_ret = recv(new_fd, msg, MAXLEN - 1, 0);
+		msg[MAXLEN - 1] = '\0';
 
-	if(recv_ret == -1) {
-		perror("recv");
-		exit(1);
+		if(recv_ret == -1) {
+			perror("recv");
+			exit(1);
+		}
+
+		if(recv_ret == 0) {
+			printf("Client %d closed the connection\n", getpid());
+		}
+
+		/* ... and play it */
+		if (pa_simple_write(sw, msg, sizeof(msg), &error) < 0) {
+			fprintf(stderr, __FILE__": pa_simple_write() failed: %s\n", pa_strerror(error));
+			goto finish;
+		}
 	}
-
-	if(recv_ret == 0) {
-		printf("Client %d closed the connection\n", getpid());
-	}
-
-        /* ... and play it */
-        if (pa_simple_write(sw, msg, sizeof(msg), &error) < 0) {
-		fprintf(stderr, __FILE__": pa_simple_write() failed: %s\n", pa_strerror(error));
-		goto finish;
-        }
 
 	close(new_fd);
 	return NULL;
