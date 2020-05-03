@@ -211,12 +211,6 @@ void *thread_read(void *param) {
 	// clear message
 	memset(msg, 0, MAXLEN);
 
-	/* // Execute close_server() signal handler when CTRL-C is called */
-	/* if (signal(SIGINT, close_server) == SIG_ERR) { */
-	/* 	perror("signal"); */
-	/* 	exit(1); */
-	/* } */
-
 	// Load up address structs with getaddrinfo():
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC; // use IPV4 or IPV6, whichever
@@ -259,6 +253,7 @@ void *thread_read(void *param) {
 	// Now accept an incoming connection
 	addr_size = sizeof(their_addr);
 	while(1) {
+		printf("Inside the while of recv\n");
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
 
 		if (new_fd == -1) {
@@ -287,8 +282,8 @@ void *thread_routine(void *param) {
 
 	printf("Process ID of this client: %d\n", getpid());
 	while (1) {
-		int recv_ret = recv(new_fd, msg, MAXLEN - 1, 0);
-		msg[MAXLEN - 1] = '\0';
+		int recv_ret = recv(new_fd, msg, MAXLEN, 0);
+		//msg[MAXLEN - 1] = '\0';
 
 		if(recv_ret == -1) {
 			perror("recv");

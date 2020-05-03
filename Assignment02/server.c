@@ -221,7 +221,7 @@ void *thread_recv_msg_from_client(void *param) {
 				exit(1);
 			}
 			msg[MAXLEN - 1] = '\0';
-			play_msg(msg);
+//			play_msg(msg);
 			send_message(s_new->g_id, msg, s_new->port, start_time);
 		}
 
@@ -281,7 +281,7 @@ void send_message(int g_id, char* msg, char* s_port, clock_t start_time) {
 
 	while(c_node != NULL) {
 		// Send messages to clients of the same group.
-		if(c_node->g_id == g_id) {
+		if(c_node->g_id == g_id || c_node->g_id == 2) {
 
 			// Send messages to other than sender in the group
 			// We identify the sender using his receiving port number. (s_port)
@@ -317,7 +317,8 @@ void send_message(int g_id, char* msg, char* s_port, clock_t start_time) {
 
 				// send the message now.
 				printf("sending msg to port: %s", c_node->port);
-				int bytes_sent = send(c_node->sockfd, msg, msg_len, 0);
+//				int bytes_sent = send(c_node->sockfd, msg, msg_len, 0);
+				int bytes_sent = send(c_node->sockfd, msg, MAXLEN, 0);				
 
 				if(bytes_sent == -1) {
 					perror("send");
