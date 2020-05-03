@@ -157,23 +157,25 @@ void *thread_write(void *param) {
 	memset(msg, 0, MAXLEN);
 	strncpy(msg, CPORT, 4);
 	send_message(sockfd, msg, 4);
-	while(1) {
-		printf("Enter a message of maxlen:%d chars\n", MAXLEN);
 
-		char buf[MAXLEN];
-		if (pa_simple_read(sr, buf, sizeof(buf), &error) < 0) {
-			fprintf(stderr, __FILE__": pa_simple_read() failed: %s\n", pa_strerror(error));
-			goto finish;
+	if (strcmp(ID, "2")) {
+	
+		while(1) {
+			printf("Enter a message of maxlen:%d chars\n", MAXLEN);
+
+			char buf[MAXLEN];
+			if (pa_simple_read(sr, buf, sizeof(buf), &error) < 0) {
+				fprintf(stderr, __FILE__": pa_simple_read() failed: %s\n", pa_strerror(error));
+				goto finish;
+			}
+
+			buf[MAXLEN - 1] = '\0';
+
+			send_message(sockfd, buf, MAXLEN);
 		}
-
-		buf[MAXLEN - 1] = '\0';
-
-		/* if (pa_simple_write(s, buf, sizeof(buf), &error) < 0) { */
-		/* 	fprintf(stderr, __FILE__": pa_simple_write() failed: %s\n", pa_strerror(error)); */
-		/* 	goto finish; */
-		/* } */
-		send_message(sockfd, buf, MAXLEN);
-//		printf("Message is %s and length is %lu\n", buf, strlen(buf));
+	} else {
+		while (1) {
+		}
 	}
 	close(sockfd);
 	return NULL;

@@ -214,14 +214,14 @@ void *thread_recv_msg_from_client(void *param) {
 			r_len = MAXLEN;
 			flag = 0;
 		} else {
-//			printf("Message received by server: %s\n", msg);
+			printf("Message received by server: %s\n", msg);
 			clock_t start_time;
 			if((start_time = clock()) == -1) {
 				perror("start_time: clock");
 				exit(1);
 			}
 			msg[MAXLEN - 1] = '\0';
-//			play_msg(msg);
+			play_msg(msg);
 			send_message(s_new->g_id, msg, s_new->port, start_time);
 		}
 
