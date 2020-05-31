@@ -30,15 +30,29 @@ void *thread_write(void *param);
 void *thread_routine(void *param);
 void send_message(int sockfd, char *msg, int msg_len);
 
+FILE* fptr;
+int w_tofile = 0;
+
 int main(int argc, char **argv) {
 
-	if (argc != 4) {
+	if (argc < 4) {
 		printf("Usage: ./client GROUP_ID CLIENT_PORT_NO SERVER_PORT_NO\n");
 		printf("GROUPID: Group to which this client belongs\n");
 		printf("CLIENT_PORT_NO: Port at which client receives messages\n");
 		printf("SERVER_PORT_NO: Port at which server receives messages (4 digits)\n");
 		printf("Ex: ./client 2 4001 3233\n");
 		exit(1);
+	}
+
+	if (argc == 5) {
+		printf("Yes..Inside right number\n");
+		w_tofile = 1;
+		fptr = fopen("./data.txt", "w");
+
+		if (fptr == NULL) {
+			perror("fopen");
+			exit(1);
+		}
 	}
 
 	/* The sample type to use */
@@ -157,25 +171,19 @@ void *thread_write(void *param) {
 	memset(msg, 0, MAXLEN);
 	strncpy(msg, CPORT, 4);
 	send_message(sockfd, msg, 4);
-
-	if (strcmp(ID, "2")) {
 	
-		while(1) {
-			printf("Enter a message of maxlen:%d chars\n", MAXLEN);
+	while(1) {
+		printf("Enter a message of maxlen:%d chars\n", MAXLEN);
 
-			char buf[MAXLEN];
-			if (pa_simple_read(sr, buf, sizeof(buf), &error) < 0) {
-				fprintf(stderr, __FILE__": pa_simple_read() failed: %s\n", pa_strerror(error));
-				goto finish;
-			}
-
-			buf[MAXLEN - 1] = '\0';
-
-			send_message(sockfd, buf, MAXLEN);
+		char buf[MAXLEN];
+		if (pa_simple_read(sr, buf, sizeof(buf), &error) < 0) {
+			fprintf(stderr, __FILE__": pa_simple_read() failed: %s\n", pa_strerror(error));
+			goto finish;
 		}
-	} else {
-		while (1) {
-		}
+
+		buf[MAXLEN - 1] = '\0';
+
+		send_message(sockfd, buf, MAXLEN);
 	}
 	close(sockfd);
 	return NULL;
@@ -295,12 +303,18 @@ void *thread_routine(void *param) {
 		}
 
 		/* ... and play it */
-		if (pa_simple_write(sw, msg, sizeof(msg), &error) < 0) {
-			fprintf(stderr, __FILE__": pa_simple_write() failed: %s\n", pa_strerror(error));
-			goto finish;
+		if (!w_tofile) {
+			if (pa_simple_write(sw, msg, sizeof(msg), &error) < 0) {
+				fprintf(stderr, __FILE__": pa_simple_write() failed: %s\n", pa_strerror(error));
+				goto finish;
+			}
+		} else {
+			printf("Writing to file\n");
+			fwrite(msg, sizeof(msg[0]), MAXLEN, fptr);
 		}
 	}
 
+	fclose(fptr);
 	close(new_fd);
 	return NULL;
 

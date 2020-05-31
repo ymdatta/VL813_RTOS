@@ -23,7 +23,7 @@ char MYPORT[4];  //the port clients will be connecting to
  * port[4] - Receiving port of the client.
  *        (The port to which server should send messages to client)
  * next - Pointer to the next client.
- */	  	  
+ */
 struct client {
 	int g_id;
 	char port[4];
@@ -57,13 +57,13 @@ int main(int argc, char **argv) {
 
 	memset(MYPORT, 0, 4);
 	strcpy(MYPORT, argv[1]);
-	
+
 	char msg[MAXLEN];
 	struct sockaddr_storage their_addr;
 	socklen_t addr_size;
 	struct addrinfo hints, *res;
 	int new_fd;
-	
+
 	/* The Sample format to use */
 	static const pa_sample_spec ss = {
 		.format = PA_SAMPLE_S16LE,
@@ -72,13 +72,11 @@ int main(int argc, char **argv) {
 	};
 	int error;
 
-	printf("Before simple new\n");
-	
 	/* Create a new playback stream */
 	if (!(s = pa_simple_new(NULL, "playback_server", PA_STREAM_PLAYBACK, NULL, "playback_server_stream", &ss, NULL, NULL, &error))) {
 		fprintf(stderr, __FILE__": pa_simple_new() failed: %s\n", pa_strerror(error));
 		goto finish;
-	}	
+	}
 
 	// clear message
 	memset(msg, 0, MAXLEN);
@@ -88,7 +86,7 @@ int main(int argc, char **argv) {
 		perror("signal");
 		exit(1);
 	}
-	
+
 	// Load up address structs with getaddrinfo():
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC; // use IPV4 or IPV6, whichever
@@ -143,22 +141,21 @@ int main(int argc, char **argv) {
 			perror("pthread_create");
 			exit(1);
 		}
-	       
+
 	}
 	close(sockfd);
 	return 0;
 
 finish:
-	printf("In goto: main\n");	
+	printf("In goto: main\n");
 	if (s)
-		pa_simple_free(s);	
+		pa_simple_free(s);
 }
 
 
 void play_msg(char *msg) {
 
 	int error;
-	printf("Before simple write\n");
         /* ... and play it */
         if (pa_simple_write(s, msg, MAXLEN, &error) < 0) {
 		fprintf(stderr, __FILE__": pa_simple_write() failed: %s\n", pa_strerror(error));
@@ -169,7 +166,7 @@ void play_msg(char *msg) {
 	return;
 
 finish:
-	printf("In goto: play_msg\n");	
+	printf("In goto: play_msg\n");
 	if (s)
 		pa_simple_free(s);
 }
@@ -185,7 +182,7 @@ void *thread_recv_msg_from_client(void *param) {
 	// In Brief: to limit what recv receives.
 	int r_len = 1;
 	while(1) {
-		memset(msg, 0, MAXLEN);								
+		memset(msg, 0, MAXLEN);
 		int recv_ret = recv(new_fd, msg, r_len, 0);
 
 		if(recv_ret == -1) {
@@ -243,7 +240,7 @@ void close_server(int signum) {
 	}
 
 	if(c == 'Y') {
-		printf("Log of all clients connected to the server:\n");		
+		printf("Log of all clients connected to the server:\n");
 		close(sockfd);
 		struct client *temp = g_sockets;
 		while(temp != NULL) {
@@ -270,7 +267,7 @@ void send_message(int g_id, char* msg, char* s_port, clock_t start_time) {
 //	int sockfd;
 	char cPort[4];
 	clock_t end_time;
-	struct addrinfo hints, *res;	
+	struct addrinfo hints, *res;
 	struct client *c_node = g_sockets;
 
 	// Load up address structs with getaddrinfo():
@@ -281,7 +278,7 @@ void send_message(int g_id, char* msg, char* s_port, clock_t start_time) {
 
 	while(c_node != NULL) {
 		// Send messages to clients of the same group.
-		if(c_node->g_id == g_id || c_node->g_id == 2) {
+		if(c_node->g_id == g_id) {
 
 			// Send messages to other than sender in the group
 			// We identify the sender using his receiving port number. (s_port)
@@ -317,8 +314,7 @@ void send_message(int g_id, char* msg, char* s_port, clock_t start_time) {
 
 				// send the message now.
 				printf("sending msg to port: %s", c_node->port);
-//				int bytes_sent = send(c_node->sockfd, msg, msg_len, 0);
-				int bytes_sent = send(c_node->sockfd, msg, MAXLEN, 0);				
+				int bytes_sent = send(c_node->sockfd, msg, MAXLEN, 0);
 
 				if(bytes_sent == -1) {
 					perror("send");

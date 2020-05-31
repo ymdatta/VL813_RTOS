@@ -1,0 +1,71 @@
+* Audio client-server application:
+
+  In this application, clients can form and talk in groups.
+
+  If a client of one group sends message to server, the server sends the message to
+  all other clients of the same group. There is no direct communication between
+  clients, but the communication happens via server in between.
+
+* Instructions to run:
+** Run the makefile:
+
+   First run the makefile to create client and server binaries.
+
+   #+BEGIN_SRC bash
+   make -f makefile.mk
+   #+END_SRC
+** To run server:
+
+   #+BEGIN_SRC bash
+   ./server PORT_NUMBER
+
+   Ex: ./server 3233
+   #+END_SRC
+
+   - PORT_NUMBER: It is the port through which server listens to requests.
+
+** To run client:
+
+   There are two ways in which we can run the client
+
+   1. Play the message received
+
+      #+BEGIN_SRC bash
+      ./client GROUP_NUM CLIENT_PORT_NUMBER SERVER_PORT_NUMBER
+
+      Ex: ./client 1 4001 3233
+      #+END_SRC
+
+      - GROUP_NUM          : This indicates the group number to which client belongs (0-9)
+      - CLIENT_PORT_NUMBER : This is the port through which client listens to messages the
+	                     server sends.
+      - SERVER_PORT_NUMBER : This is the port through which server listens to messages from
+	                     the clients, this has to match with one we initialize the server with.
+
+   2. Store the message received
+
+      #+BEGIN_SRC bash
+      ./client GROUP_NUM CLIENT_PORT_NUMBER SERVER_PORT_NUMBER RANDOM_ARGUMENT
+
+      Ex: ./client 1 4001 3233 x
+      #+END_SRC
+
+      - GROUP_NUM          : This indicates the group number to which client belongs (0-9)
+      - CLIENT_PORT_NUMBER : This is the port through which client listens to messages the
+	                     server sends.
+      - SERVER_PORT_NUMBER : This is the port through which server listens to messages from
+	                     the clients, this has to match with one we initialize the server with.
+      - RANDOM_ARGUMENT    : This can be anything. Logic used to decide whether to store
+	                     or play the message is based on number of arguments. So, if
+			     5 arguments are there, it will store the message instead of
+			     playing.
+
+      When another client sends message to this client, opened in storing message mode,
+      the message is stored in 'data.txt' file in the directory in which this client is
+      run.
+
+      To play the message stored you can do `./pacat data.txt`. pacat is the binary
+      obtained by compiling [[https://freedesktop.org/software/pulseaudio/doxygen/pacat-simple_8c-example.html][pacat-simple.c]].
+* Remarks:
+
+  Feel free to create an issue if you find any difficulties.
