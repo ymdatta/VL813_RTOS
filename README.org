@@ -1,0 +1,6 @@
+This repository contains assignments for RTOS course at IIITB.
+
+Please find the corresponding README's in the folders for instructions to run.
+
+- Assignment 01: Client-Server Text chat application.
+- Assignment 02: Client-Server Audio chat application.
